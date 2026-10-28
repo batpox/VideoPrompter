@@ -4,7 +4,7 @@ A compact, independently runnable **.NET 10 Blazor Server** teleprompter designe
 
 ## Current Status
 
-Working prototype. The application supports a narrow browser window, script editing, word-by-word highlighting and scrolling, click-to-seek, reset, adjustable text size, and mirrored display. Speech following uses interim recognition results for responsive tracking.
+Working prototype. The application supports a narrow browser window, script editing, word-by-word highlighting and scrolling, click-to-seek, reset, adjustable text size, mirrored display, and SRT subtitle export. Speech following uses interim recognition results for responsive tracking.
 
 This is **not** a complete conversion of Lars Baunwall's PromptMe-AI recognition pipeline.
 
@@ -49,6 +49,11 @@ Requires the **.NET 10 SDK** and a browser with compatible speech recognition.
 3. Grant microphone access when prompted.
 4. Select **Script** to edit or paste your text, then **Load Script**.
 5. Select **Start** and speak naturally. Resize the browser beside OBS. **Stop** ends recognition; **Reset** returns to the beginning.
+6. Select **Export SRT** to download subtitles generated from finalized speech-recognition results. Export after stopping or during the session; starting a new session clears the previous captions.
+
+### SRT Timing Limitations
+
+The browser Web Speech API does not supply reliable per-word audio timestamps. VideoPrompter therefore estimates each subtitle cue's start and end from recognition-result arrival time and spoken word count. Captions contain the **recognized speech**, which may differ from the pasted script, and may need timing/text adjustments in your video editor. Start recognition when you start recording in OBS if you want their timelines to align; otherwise offset the captions in post-production. **Export SRT** needs finalized recognition results; merely pasting a script does not produce timed captions.
 
 The application runs as its own ASP.NET Core process; it does **not** require another application to host it. It still needs a browser for the user interface.
 
