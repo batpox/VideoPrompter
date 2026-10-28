@@ -84,3 +84,7 @@ Folder selection requires the File System Access API (desktop Edge or Chrome, on
 **Settings → Speech Source** offers **Browser Speech Recognition (Edge / Chrome)** and **Local Speech Engine (planned)**. The selection is saved in this browser's local storage and restored on reload. Browser recognition is the only operational engine today; selecting Local disables Start and clearly indicates that local recognition has not been implemented. Switching sources is disabled while recognition is running. This is a future integration point, not a claim that offline recognition is already available.
 
 The speech source is passed to the JavaScript recognition entry point. Transcript matching and SRT generation remain independent of which recognition backend is eventually implemented.
+
+## Support VideoPrompter
+
+VideoPrompter is free and open source. If you find it useful and would like to support its development, you're welcome to [leave a tip via PayPal](https://paypal.me/metalBlender). Donations are entirely optional.
