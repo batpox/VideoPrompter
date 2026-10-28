@@ -49,11 +49,11 @@ Requires the **.NET 10 SDK** and a browser with compatible speech recognition.
 3. Grant microphone access when prompted.
 4. Select **Script** to edit or paste your text, then **Load Script**.
 5. Select **Start** and speak naturally. Resize the browser beside OBS. **Stop** ends recognition; **Reset** returns to the beginning.
-6. Select **Export SRT** to download subtitles generated from finalized speech-recognition results. Export after stopping or during the session; starting a new session clears the previous captions.
+6. Select **Export SRT** to save subtitles using the original script words aligned against finalized speech-recognition results. Export after stopping or during the session; starting a new session clears the previous captions.
 
 ### SRT Timing Limitations
 
-The browser Web Speech API does not supply reliable per-word audio timestamps. VideoPrompter therefore estimates each subtitle cue's start and end from recognition-result arrival time and spoken word count. Captions contain the **recognized speech**, which may differ from the pasted script, and may need timing/text adjustments in your video editor. Start recognition when you start recording in OBS if you want their timelines to align; otherwise offset the captions in post-production. **Export SRT** needs finalized recognition results; merely pasting a script does not produce timed captions.
+The browser Web Speech API does not supply reliable per-word audio timestamps. VideoPrompter therefore estimates each subtitle cue's start and end from recognition-result arrival time and spoken word count. Captions use **the original script's spelling, capitalization and punctuation**, not the browser's transcript. The final recognized speech is used only to match script position and estimate timing. Cues are grouped into approximately eight script words. If a match jumps too far (for example, because a sentence was skipped), the intervening words are not emitted. Unmatched speech or improvisation is not added. Timing and match boundaries may still need adjustment in your video editor. Start recognition when you start recording in OBS if you want their timelines to align; otherwise offset the captions in post-production. **Export SRT** needs finalized recognition results; merely pasting a script does not produce timed captions.
 
 The application runs as its own ASP.NET Core process; it does **not** require another application to host it. It still needs a browser for the user interface.
 
