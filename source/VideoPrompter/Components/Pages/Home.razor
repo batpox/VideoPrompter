@@ -3,7 +3,7 @@
 @inject IJSRuntime JS
 <div class="toolbar">
  <strong>VideoPrompter</strong>
- <button @onclick="Toggle">@(_running ? "Stop" : "Start")</button>
+ <button @onclick="Toggle" disabled="@(!_running && _speechEngine != "browser")">@(_running ? "Stop" : "Start")</button>
  <button @onclick="() => _editing = !_editing">Script</button>
  <button @onclick="Reset">Reset</button>
  <button @onclick="() => _settings = !_settings">Settings</button>
@@ -15,6 +15,8 @@
 @if (_settings)
 {
  <div class="settings">
+  <div><strong>Speech Source:</strong> <select aria-label="Speech recognition source" @bind="_speechEngine" @bind:after="SaveSpeechEngine" disabled="@_running"><option value="browser">Browser Speech Recognition (Edge / Chrome)</option><option value="local">Local Speech Engine (planned)</option></select></div>
+  <small>@(_speechEngine == "browser" ? "Browser recognition may send microphone audio to a cloud service." : "Local recognition is not implemented yet. Choose Browser to start recording.")</small>
   <div><strong>Text Folder:</strong> @(_textFolder.Length==0 ? "Not selected" : _textFolder) <button @onclick="ChooseTextFolder">Choose Folder</button></div>
   <div><strong>SRT Folder:</strong> @(_srtFolder.Length==0 ? (_textFolder.Length==0 ? "Default browser downloads" : "Same as text folder") : _srtFolder) <button @onclick="ChooseSrtFolder">Choose Folder</button> <button @onclick="ClearSrtFolder">Use Text Folder</button></div>
   @if (_textFiles.Length>0)
@@ -42,6 +44,7 @@
  private string _script="Welcome to VideoPrompter. As you speak, the text follows your words. Pause and the script pauses with you.";
  private bool _editing=true,_running,_mirror,_settings;
  private string _textFolder="",_srtFolder="",_selectedFile="";
+ private string _speechEngine="browser";
  private string[] _textFiles=[];
  private bool _interactiveReady;
  private int _fontSize=36;
@@ -55,12 +58,15 @@
      _reference=DotNetObjectReference.Create(this);
      _interactiveReady=true;
      await JS.InvokeVoidAsync("videoPrompter.initializeFolders",_reference);
+     _speechEngine=await JS.InvokeAsync<string>("videoPrompter.getSpeechEngine");
+     await InvokeAsync(StateHasChanged);
    }
  }
+ private async Task SaveSpeechEngine()=>await JS.InvokeVoidAsync("videoPrompter.setSpeechEngine",_speechEngine);
  private async Task Toggle()
  {
    if(_running){await JS.InvokeVoidAsync("videoPrompter.stop");_running=false;_status="Stopped";}
-   else {try{_captionTracker.Load(_script);_captionTracker.Seek(_tracker.Position);await JS.InvokeVoidAsync("videoPrompter.start",_reference);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
+   else {try{if(_speechEngine!="browser"){_status="Local speech recognition is not implemented yet.";return;}_captionTracker.Load(_script);_captionTracker.Seek(_tracker.Position);await JS.InvokeVoidAsync("videoPrompter.start",_reference,_speechEngine);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
  }
  private Task ChooseTextFolder()=>ChooseFolder("text");
  private Task ChooseSrtFolder()=>ChooseFolder("srt");
