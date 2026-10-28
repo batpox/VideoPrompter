@@ -15,8 +15,8 @@
 @if (_settings)
 {
  <div class="settings">
-  <div><strong>Text Folder:</strong> @(_textFolder.Length==0 ? "Not selected" : _textFolder) <button @onclick="() => ChooseFolder(\"text\")">Choose Folder</button></div>
-  <div><strong>SRT Folder:</strong> @(_srtFolder.Length==0 ? (_textFolder.Length==0 ? "Default browser downloads" : "Same as text folder") : _srtFolder) <button @onclick="() => ChooseFolder(\"srt\")">Choose Folder</button> <button @onclick="ClearSrtFolder">Use Text Folder</button></div>
+  <div><strong>Text Folder:</strong> @(_textFolder.Length==0 ? "Not selected" : _textFolder) <button @onclick="ChooseTextFolder">Choose Folder</button></div>
+  <div><strong>SRT Folder:</strong> @(_srtFolder.Length==0 ? (_textFolder.Length==0 ? "Default browser downloads" : "Same as text folder") : _srtFolder) <button @onclick="ChooseSrtFolder">Choose Folder</button> <button @onclick="ClearSrtFolder">Use Text Folder</button></div>
   @if (_textFiles.Length>0)
   {
    <div><label for="textFile">Text File:</label> <select id="textFile" @bind="_selectedFile"><option value="">Select a file</option>@foreach(var file in _textFiles){<option value="@file">@file</option>}</select> <button @onclick="LoadSelectedFile" disabled="@string.IsNullOrEmpty(_selectedFile)">Load Text File</button></div>
@@ -61,6 +61,8 @@
    if(_running){await JS.InvokeVoidAsync("videoPrompter.stop");_running=false;_status="Stopped";}
    else {try{await JS.InvokeVoidAsync("videoPrompter.start",_reference);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
  }
+ private Task ChooseTextFolder()=>ChooseFolder("text");
+ private Task ChooseSrtFolder()=>ChooseFolder("srt");
  private async Task ChooseFolder(string kind)
  {
   try{await JS.InvokeVoidAsync("videoPrompter.selectFolder",kind);}
