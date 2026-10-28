@@ -70,3 +70,11 @@ The near-term approach is to retain the current browser engine as a working base
 Inspired by [Lars Baunwall's PromptMe-AI](https://github.com/larsbaunwall/promptme-ai), licensed under Apache 2.0. VideoPrompter is also licensed under **Apache 2.0**; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 No source code from Lars's recognition workers is included in this prototype.
+
+## Folder Settings
+
+Open **Settings** to choose a Text Folder and optionally an SRT Folder. The Text Folder lists .txt and .md files; select one and click **Load Text File**. You can still paste scripts through **Script**.
+
+**Export SRT** writes to the selected SRT Folder, or to the Text Folder if the SRT Folder is blank. With neither selected, the browser downloads the file normally. **Use Text Folder** clears the separate SRT destination.
+
+Folder selection requires the File System Access API (desktop Edge or Chrome, on localhost or HTTPS). The browser stores folder handles for later sessions but may request permission again. The UI displays folder names rather than full Windows paths.
