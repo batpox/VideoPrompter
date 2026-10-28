@@ -38,6 +38,7 @@
 <div class="footer"><span>@_tracker.Position / @_tracker.Count words</span><span>Microphone stays on this device · Resize this window beside OBS</span></div>
 @code {
  private readonly ScriptTracker _tracker=new();
+ private readonly ScriptTracker _captionTracker=new();
  private string _script="Welcome to VideoPrompter. As you speak, the text follows your words. Pause and the script pauses with you.";
  private bool _editing=true,_running,_mirror,_settings;
  private string _textFolder="",_srtFolder="",_selectedFile="";
@@ -46,7 +47,7 @@
  private int _fontSize=36;
  private string _status="Ready";
  private DotNetObjectReference<Home>? _reference;
- protected override void OnInitialized()=>_tracker.Load(_script);
+ protected override void OnInitialized(){_tracker.Load(_script);_captionTracker.Load(_script);}
  protected override async Task OnAfterRenderAsync(bool firstRender)
  {
    if(firstRender)
@@ -59,7 +60,7 @@
  private async Task Toggle()
  {
    if(_running){await JS.InvokeVoidAsync("videoPrompter.stop");_running=false;_status="Stopped";}
-   else {try{await JS.InvokeVoidAsync("videoPrompter.start",_reference);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
+   else {try{_captionTracker.Load(_script);_captionTracker.Seek(_tracker.Position);await JS.InvokeVoidAsync("videoPrompter.start",_reference);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
  }
  private Task ChooseTextFolder()=>ChooseFolder("text");
  private Task ChooseSrtFolder()=>ChooseFolder("srt");
@@ -97,9 +98,9 @@
   return InvokeAsync(StateHasChanged);
  }
  private async Task ExportSrt()=>await JS.InvokeVoidAsync("videoPrompter.exportSrt");
- private void ApplyScript(){_tracker.Load(_script);_editing=false;}
- private async Task Reset(){_tracker.Seek(0);await JS.InvokeVoidAsync("videoPrompter.scrollTo",0);}
- private async Task Seek(int i){_tracker.Seek(i);await JS.InvokeVoidAsync("videoPrompter.scrollTo",i);}
+ private async Task ApplyScript(){_tracker.Load(_script);_captionTracker.Load(_script);_editing=false;await JS.InvokeVoidAsync("videoPrompter.clearCaptions");}
+ private async Task Reset(){_tracker.Seek(0);_captionTracker.Seek(0);await JS.InvokeVoidAsync("videoPrompter.scrollTo",0);}
+ private async Task Seek(int i){_tracker.Seek(i);_captionTracker.Seek(i);await JS.InvokeVoidAsync("videoPrompter.scrollTo",i);}
  [JSInvokable]
  public async Task OnTranscript(string text,bool isFinal)
  {
@@ -108,6 +109,19 @@
    _status=isFinal?"Listening": "Recognizing";
    await InvokeAsync(StateHasChanged);
    await JS.InvokeVoidAsync("videoPrompter.scrollTo",_tracker.Position);
+ }
+ [JSInvokable]
+ public Task<string[]> OnFinalCaption(string transcript)
+ {
+   if(!_running || string.IsNullOrWhiteSpace(transcript))return Task.FromResult(Array.Empty<string>());
+   var start=_captionTracker.Position;
+   var end=_captionTracker.Match(transcript);
+   var spokenCount=System.Text.RegularExpressions.Regex.Matches(transcript,@"[\\p{L}\\p{N}']+").Count;
+   if(end<=start)return Task.FromResult(Array.Empty<string>());
+   // A large jump likely means the speaker skipped part of the script.
+   // Move the cursor but do not insert unspoken intervening words into subtitles.
+   if(end-start>spokenCount+3)return Task.FromResult(Array.Empty<string>());
+   return Task.FromResult(_captionTracker.DisplayWords.Skip(start).Take(end-start).ToArray());
  }
  [JSInvokable]
  public Task OnStatus(string text){_status=text;return InvokeAsync(StateHasChanged);}
