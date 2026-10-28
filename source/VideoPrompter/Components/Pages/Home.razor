@@ -18,7 +18,7 @@
  @for(var i=0;i<_tracker.Count;i++)
  {
    var n=i;
-   <span id="@($"word-{i}")" class="word @(i<_tracker.Position?"past":i==_tracker.Position?"current":"")" @onclick="()=>Seek(n)">@_tracker.DisplayWords[i] </span>
+   <span id="@($"word-{i}")" class="word @(i<_tracker.Position?"past":i==_tracker.Position?"current":"")" @onclick="()=>Seek(n)">@_tracker.DisplayWords[i]</span><span class="word-gap" aria-hidden="true"> </span>
  }
 </div>
 <div class="footer"><span>@_tracker.Position / @_tracker.Count words</span><span>Microphone stays on this device · Resize this window beside OBS</span></div>
