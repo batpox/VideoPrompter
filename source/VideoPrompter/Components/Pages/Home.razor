@@ -116,7 +116,7 @@
    if(!_running || string.IsNullOrWhiteSpace(transcript))return Task.FromResult(Array.Empty<string>());
    var start=_captionTracker.Position;
    var end=_captionTracker.Match(transcript);
-   var spokenCount=System.Text.RegularExpressions.Regex.Matches(transcript,@"[\\p{L}\\p{N}']+").Count;
+   var spokenCount=System.Text.RegularExpressions.Regex.Matches(transcript,@"[\p{L}\p{N}']+").Count;
    if(end<=start)return Task.FromResult(Array.Empty<string>());
    // A large jump likely means the speaker skipped part of the script.
    // Move the cursor but do not insert unspoken intervening words into subtitles.
