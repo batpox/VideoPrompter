@@ -85,7 +85,7 @@
   try
   {
    _script=await JS.InvokeAsync<string>("videoPrompter.loadTextFile",_selectedFile);
-   ApplyScript();
+   await ApplyScript();
    _status="Loaded "+_selectedFile;
   }
   catch(Exception ex){_status="Text file: "+ex.Message;}
