@@ -6,11 +6,24 @@
  <button @onclick="Toggle">@(_running ? "Stop" : "Start")</button>
  <button @onclick="() => _editing = !_editing">Script</button>
  <button @onclick="Reset">Reset</button>
+ <button @onclick="() => _settings = !_settings">Settings</button>
  <button @onclick="ExportSrt" title="Download captions from finalized speech recognition">Export SRT</button>
  <label>Text <input aria-label="Font size" type="range" min="20" max="68" @bind="_fontSize" @bind:event="oninput" /></label>
  <label><input type="checkbox" @bind="_mirror" /> Mirror</label>
  <span class="status">@_status</span>
 </div>
+@if (_settings)
+{
+ <div class="settings">
+  <div><strong>Text Folder:</strong> @(_textFolder.Length==0 ? "Not selected" : _textFolder) <button @onclick="() => ChooseFolder(\"text\")">Choose Folder</button></div>
+  <div><strong>SRT Folder:</strong> @(_srtFolder.Length==0 ? (_textFolder.Length==0 ? "Default browser downloads" : "Same as text folder") : _srtFolder) <button @onclick="() => ChooseFolder(\"srt\")">Choose Folder</button> <button @onclick="ClearSrtFolder">Use Text Folder</button></div>
+  @if (_textFiles.Length>0)
+  {
+   <div><label for="textFile">Text File:</label> <select id="textFile" @bind="_selectedFile"><option value="">Select a file</option>@foreach(var file in _textFiles){<option value="@file">@file</option>}</select> <button @onclick="LoadSelectedFile" disabled="@string.IsNullOrEmpty(_selectedFile)">Load Text File</button></div>
+  }
+  <small>Choose a folder containing .txt or .md scripts. SRT files save to the text folder when no SRT folder is selected. Browser permission may be requested again after reopening.</small>
+ </div>
+}
 @if (_editing)
 {
  <div class="editor"><textarea aria-label="Script" @bind="_script"></textarea><button @onclick="ApplyScript">Load Script</button></div>
@@ -26,24 +39,60 @@
 @code {
  private readonly ScriptTracker _tracker=new();
  private string _script="Welcome to VideoPrompter. As you speak, the text follows your words. Pause and the script pauses with you.";
- private bool _editing=true,_running,_mirror;
+ private bool _editing=true,_running,_mirror,_settings;
+ private string _textFolder="",_srtFolder="",_selectedFile="";
+ private string[] _textFiles=[];
  private bool _interactiveReady;
  private int _fontSize=36;
  private string _status="Ready";
  private DotNetObjectReference<Home>? _reference;
  protected override void OnInitialized()=>_tracker.Load(_script);
- protected override void OnAfterRender(bool firstRender)
+ protected override async Task OnAfterRenderAsync(bool firstRender)
  {
    if(firstRender)
    {
      _reference=DotNetObjectReference.Create(this);
      _interactiveReady=true;
+     await JS.InvokeVoidAsync("videoPrompter.initializeFolders",_reference);
    }
  }
  private async Task Toggle()
  {
    if(_running){await JS.InvokeVoidAsync("videoPrompter.stop");_running=false;_status="Stopped";}
    else {try{await JS.InvokeVoidAsync("videoPrompter.start",_reference);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
+ }
+ private async Task ChooseFolder(string kind)
+ {
+  try{await JS.InvokeVoidAsync("videoPrompter.selectFolder",kind);}
+  catch(Exception ex){_status="Folder selection: "+ex.Message;}
+ }
+ private async Task ClearSrtFolder()
+ {
+  try{await JS.InvokeVoidAsync("videoPrompter.clearSrtFolder");}
+  catch(Exception ex){_status="Folder selection: "+ex.Message;}
+ }
+ private async Task LoadSelectedFile()
+ {
+  try
+  {
+   _script=await JS.InvokeAsync<string>("videoPrompter.loadTextFile",_selectedFile);
+   ApplyScript();
+   _status="Loaded "+_selectedFile;
+  }
+  catch(Exception ex){_status="Text file: "+ex.Message;}
+ }
+ [JSInvokable]
+ public Task OnFoldersChanged(string textFolder,string srtFolder,string[] files)
+ {
+  _textFolder=textFolder;_srtFolder=srtFolder;_textFiles=files;
+  if(!files.Contains(_selectedFile))_selectedFile="";
+  return InvokeAsync(StateHasChanged);
+ }
+ [JSInvokable]
+ public Task OnFolderError(string message)
+ {
+  _status="Folders: "+message;
+  return InvokeAsync(StateHasChanged);
  }
  private async Task ExportSrt()=>await JS.InvokeVoidAsync("videoPrompter.exportSrt");
  private void ApplyScript(){_tracker.Load(_script);_editing=false;}
