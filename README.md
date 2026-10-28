@@ -78,3 +78,9 @@ Open **Settings** to choose a Text Folder and optionally an SRT Folder. The Text
 **Export SRT** writes to the selected SRT Folder, or to the Text Folder if the SRT Folder is blank. With neither selected, the browser downloads the file normally. **Use Text Folder** clears the separate SRT destination.
 
 Folder selection requires the File System Access API (desktop Edge or Chrome, on localhost or HTTPS). The browser stores folder handles for later sessions but may request permission again. The UI displays folder names rather than full Windows paths.
+
+## Speech Source Selection
+
+**Settings → Speech Source** offers **Browser Speech Recognition (Edge / Chrome)** and **Local Speech Engine (planned)**. The selection is saved in this browser's local storage and restored on reload. Browser recognition is the only operational engine today; selecting Local disables Start and clearly indicates that local recognition has not been implemented. Switching sources is disabled while recognition is running. This is a future integration point, not a claim that offline recognition is already available.
+
+The speech source is passed to the JavaScript recognition entry point. Transcript matching and SRT generation remain independent of which recognition backend is eventually implemented.
