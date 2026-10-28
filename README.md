@@ -1,16 +1,67 @@
 # VideoPrompter
 
-Compact, side-by-side teleprompter for recording with OBS or other video software.
+A compact, independently runnable **.NET 10 Blazor Server** teleprompter designed to share a monitor with OBS or other video-recording software. VideoPrompter follows your spoken script, highlights its current position, and scrolls as you speak.
 
-## Status
-**First Blazor port / prototype.** .NET 10 Blazor Server UI, responsive narrow window, script editing, clickable word seeking, mirrored display, and C# fuzzy position matching.
+## Current Status
 
-**Important limitation:** This prototype currently uses the browser SpeechRecognition API. It is **not** a complete port of Lars's offline Moonshine/Silero inference pipeline; browser speech services may require network access and may send audio to a provider. Do not assume offline/private speech processing yet. A full equivalent requires migrating the AudioWorklet, VAD and ONNX workers and testing interoperability.
+Working prototype. The application supports a narrow browser window, script editing, word-by-word highlighting and scrolling, click-to-seek, reset, adjustable text size, and mirrored display. Speech following uses interim recognition results for responsive tracking.
 
-## Run
-From `source/VideoPrompter` run `dotnet run`, then open the localhost URL in Edge or Chrome. Grant microphone access. Resize the window beside OBS. Import/paste your script using **Script**.
+This is **not** a complete conversion of Lars Baunwall's PromptMe-AI recognition pipeline.
 
-## Acknowledgment
-Inspired by [PromptMe-AI](https://github.com/larsbaunwall/promptme-ai), copyright its respective contributors, licensed Apache-2.0. New VideoPrompter code is Apache-2.0. See LICENSE and NOTICE.
+## Architecture
 
-No source code from Lars's workers is included in this prototype.
+| Component | Current implementation | Responsibility |
+| --- | --- | --- |
+| Host and UI | ASP.NET Core / .NET 10 Blazor Server | Runs the application independently and renders the interactive teleprompter |
+| Speech-to-text | Browser Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`) | Converts microphone audio into interim and final transcripts |
+| Script tracking | C# `ScriptTracker` service | Tokenizes the script and uses fuzzy matching to locate the spoken words |
+| Browser integration | `wwwroot/prompter.js` | Starts/stops recognition and scrolls the active word into view |
+| Presentation | Razor components and `wwwroot/app.css` | Compact layout, highlighting, font sizing, and mirror mode |
+
+### Recognition Flow
+
+1. The browser requests microphone permission and starts its speech-recognition implementation.
+2. Interim and final transcript text is passed from JavaScript to the Blazor Server component through JS interop.
+3. The C# `ScriptTracker` matches the transcript against the script and advances the active word.
+4. Blazor updates the highlighted text; JavaScript scrolls the current word into view.
+
+**Privacy and connectivity:** VideoPrompter's C# matcher is our code, but the browser controls speech recognition. Depending on the browser and its speech backend, audio may be processed by an online service. Do **not** assume recognition is offline or that microphone audio stays on the computer. Because this is Blazor Server, interactive application state and transcript callbacks also communicate with the local ASP.NET Core server over its Blazor connection.
+
+## Browser Support
+
+VideoPrompter does **not** require Microsoft Edge. The Blazor UI can run in modern browsers, but **speech following requires a browser that exposes the Web Speech recognition API**.
+
+| Browser | Practical expectation |
+| --- | --- |
+| Microsoft Edge | Tested in our current development setup; working |
+| Google Chrome | Generally supports browser speech recognition; verify microphone behavior on your machine |
+| Safari | Speech recognition support varies by platform/version; not tested here |
+| Firefox | Speech recognition is not reliably available; not recommended for the current implementation |
+
+Recognition availability, network requirements, accuracy, and privacy behavior are determined by the browser and may change with browser versions.
+
+## Run Locally
+
+Requires the **.NET 10 SDK** and a browser with compatible speech recognition.
+
+1. Open `source/VideoPrompter/VideoPrompter.csproj` in Visual Studio 2026, or run `dotnet run` from `source/VideoPrompter`.
+2. Open the local URL shown by ASP.NET Core in Edge or Chrome.
+3. Grant microphone access when prompted.
+4. Select **Script** to edit or paste your text, then **Load Script**.
+5. Select **Start** and speak naturally. Resize the browser beside OBS. **Stop** ends recognition; **Reset** returns to the beginning.
+
+The application runs as its own ASP.NET Core process; it does **not** require another application to host it. It still needs a browser for the user interface.
+
+## Potential Future Speech Engine: Moonshine
+
+[Moonshine](https://github.com/usefulsensors/moonshine) is a local speech-to-text model designed for efficient transcription. Lars's PromptMe-AI combines local Moonshine inference with Silero voice activity detection (VAD) and an audio-processing pipeline.
+
+**Moonshine is not currently installed or used by VideoPrompter.** An optional Moonshine/ONNX-based engine could eventually offer local/offline recognition, more control over transcription timing, and reduced dependence on browser speech services. It would also add model distribution, audio capture, inference, and performance complexity. Better speed or accuracy is **not guaranteed**; these should be measured against the working browser engine before switching. A .NET ONNX Runtime integration is a possible design, not an implemented feature.
+
+The near-term approach is to retain the current browser engine as a working baseline and improve the UI, script persistence, and diagnostics before evaluating an alternative.
+
+## Attribution and License
+
+Inspired by [Lars Baunwall's PromptMe-AI](https://github.com/larsbaunwall/promptme-ai), licensed under Apache 2.0. VideoPrompter is also licensed under **Apache 2.0**; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+No source code from Lars's recognition workers is included in this prototype.
