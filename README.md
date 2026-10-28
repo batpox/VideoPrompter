@@ -2,6 +2,32 @@
 
 A compact, independently runnable **.NET 10 Blazor Server** teleprompter designed to share a monitor with OBS or other video-recording software. VideoPrompter follows your spoken script, highlights its current position, and scrolls as you speak.
 
+## What Is VideoPrompter?
+
+VideoPrompter is a free, open-source teleprompter for recording presentations, tutorials, and demonstrations. Put the prompter beside OBS or another recording window, paste your script, and speak naturally. It highlights and scrolls through the script as speech is recognized, so you can keep your place without a fixed scrolling speed.
+
+**Features:** adjustable text size, mirrored display, editable scripts, click-to-seek, script files from a chosen folder, and SRT subtitle export using the **original script wording**. Subtitle timing is estimated and may need adjustment.
+
+**How it works:** The Windows executable runs a small local .NET web server; the prompter opens in Edge or Chrome. It does **not** install a traditional desktop app. Browser speech recognition may use an online service, so microphone audio is **not guaranteed to remain on your PC**. Offline speech recognition is a planned option, not yet available.
+
+## Download for Windows
+
+**[Get the latest release](https://github.com/batpox/VideoPrompter/releases/latest)** — when a versioned release is published, download `VideoPrompter-Windows-x64.zip` from its **Assets** section. If there is no release yet, see [Actions → Windows Download](https://github.com/batpox/VideoPrompter/actions/workflows/windows-download.yml) for a successful build's artifact (GitHub sign-in may be required).
+
+1. Download `VideoPrompter-Windows-x64.zip` and **extract all files** into a folder.
+2. Double-click **`Start-VideoPrompter.cmd`**. It starts the EXE and opens `http://127.0.0.1:5088` in your browser.
+3. Allow microphone access when prompted, select **Script**, paste or edit your text, then select **Load Script**.
+4. Select **Start**, speak naturally, and select **Stop** when finished. Use **Export SRT** for approximate subtitles.
+5. Close the **VideoPrompter Server** console window to shut down the app.
+
+This Windows x64 package is self-contained; **no separate .NET runtime installation is needed**. The executable is currently unsigned, so Windows SmartScreen may display a warning. Verify the download is from this repository before running it. If port 5088 is already in use, close the conflicting app or run the EXE manually with a different `--urls` value.
+
+**For developers:** See [Run Locally](#run-locally) below to run from source with .NET 10.
+
+## Video Demonstration
+
+A YouTube walkthrough is coming soon. This section will link to it once the video is ready.
+
 ## Current Status
 
 Working prototype. The application supports a narrow browser window, script editing, word-by-word highlighting and scrolling, click-to-seek, reset, adjustable text size, mirrored display, and SRT subtitle export. Speech following uses interim recognition results for responsive tracking.
