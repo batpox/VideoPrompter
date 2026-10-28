@@ -1,0 +1,8 @@
+VideoPrompter
+Copyright 2026 VideoPrompter contributors
+
+Inspired by PromptMe-AI by Lars Baunwall and contributors:
+https://github.com/larsbaunwall/promptme-ai
+PromptMe-AI is licensed under Apache License, Version 2.0.
+
+This initial prototype implements a new Blazor UI and C# script tracker, rather than copying the original speech workers.
