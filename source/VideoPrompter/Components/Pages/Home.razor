@@ -26,13 +26,18 @@
  private readonly ScriptTracker _tracker=new();
  private string _script="Welcome to VideoPrompter. As you speak, the text follows your words. Pause and the script pauses with you.";
  private bool _editing=true,_running,_mirror;
+ private bool _interactiveReady;
  private int _fontSize=36;
  private string _status="Ready";
  private DotNetObjectReference<Home>? _reference;
  protected override void OnInitialized()=>_tracker.Load(_script);
  protected override void OnAfterRender(bool firstRender)
  {
-   if(firstRender) _reference=DotNetObjectReference.Create(this);
+   if(firstRender)
+   {
+     _reference=DotNetObjectReference.Create(this);
+     _interactiveReady=true;
+   }
  }
  private async Task Toggle()
  {
@@ -53,5 +58,19 @@
  }
  [JSInvokable]
  public Task OnStatus(string text){_status=text;return InvokeAsync(StateHasChanged);}
- public async ValueTask DisposeAsync(){try{await JS.InvokeVoidAsync("videoPrompter.stop");}catch(JSDisconnectedException){} _reference?.Dispose();}
+ public async ValueTask DisposeAsync()
+ {
+   try
+   {
+     // Prerendered components are disposed before JavaScript interop becomes available.
+     if(_interactiveReady && _running)
+       await JS.InvokeVoidAsync("videoPrompter.stop");
+   }
+   catch(JSDisconnectedException) { }
+   catch(InvalidOperationException) { } // Circuit is no longer interactive.
+   finally
+   {
+     _reference?.Dispose();
+   }
+ }
 }
