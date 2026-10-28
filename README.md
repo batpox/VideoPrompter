@@ -12,6 +12,8 @@ VideoPrompter is a free, open-source teleprompter for recording presentations, t
 
 ## Download for Windows
 
+**[Watch the installation walkthrough on YouTube](https://youtu.be/-QTW3DI319s)** — a step-by-step video showing how to install VideoPrompter.
+
 **[Get the latest release](https://github.com/batpox/VideoPrompter/releases/latest)** — when a versioned release is published, download `VideoPrompter-Windows-x64.zip` from its **Assets** section. If there is no release yet, see [Actions → Windows Download](https://github.com/batpox/VideoPrompter/actions/workflows/windows-download.yml) for a successful build's artifact (GitHub sign-in may be required).
 
 1. Download `VideoPrompter-Windows-x64.zip` and **extract all files** into a folder.
@@ -24,9 +26,9 @@ This Windows x64 package is self-contained; **no separate .NET runtime installat
 
 **For developers:** See [Run Locally](#run-locally) below to run from source with .NET 10.
 
-## Video Demonstration
+## Installation Video
 
-A YouTube walkthrough is coming soon. This section will link to it once the video is ready.
+[Watch the VideoPrompter installation walkthrough](https://youtu.be/-QTW3DI319s). For written instructions, see [Download for Windows](#download-for-windows).
 
 ## Current Status
 
