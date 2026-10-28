@@ -6,6 +6,7 @@
  <button @onclick="Toggle">@(_running ? "Stop" : "Start")</button>
  <button @onclick="() => _editing = !_editing">Script</button>
  <button @onclick="Reset">Reset</button>
+ <button @onclick="ExportSrt" title="Download captions from finalized speech recognition">Export SRT</button>
  <label>Text <input aria-label="Font size" type="range" min="20" max="68" @bind="_fontSize" @bind:event="oninput" /></label>
  <label><input type="checkbox" @bind="_mirror" /> Mirror</label>
  <span class="status">@_status</span>
@@ -44,6 +45,7 @@
    if(_running){await JS.InvokeVoidAsync("videoPrompter.stop");_running=false;_status="Stopped";}
    else {try{await JS.InvokeVoidAsync("videoPrompter.start",_reference);_running=true;_editing=false;_status="Listening";}catch(Exception ex){_status=ex.Message;}}
  }
+ private async Task ExportSrt()=>await JS.InvokeVoidAsync("videoPrompter.exportSrt");
  private void ApplyScript(){_tracker.Load(_script);_editing=false;}
  private async Task Reset(){_tracker.Seek(0);await JS.InvokeVoidAsync("videoPrompter.scrollTo",0);}
  private async Task Seek(int i){_tracker.Seek(i);await JS.InvokeVoidAsync("videoPrompter.scrollTo",i);}
