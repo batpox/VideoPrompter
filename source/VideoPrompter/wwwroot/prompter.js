@@ -94,7 +94,10 @@ async function exportSrt(){
  document.body.appendChild(link);link.click();link.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-async function start(dotnet){
+function getSpeechEngine(){return localStorage.getItem("VideoPrompterSpeechEngine")==="local"?"local":"browser";}
+function setSpeechEngine(engine){if(engine!=="browser"&&engine!=="local")throw new Error("Unknown speech source");localStorage.setItem("VideoPrompterSpeechEngine",engine);}
+async function start(dotnet,engine="browser"){
+ if(engine!=="browser")throw new Error("Local speech recognition is not implemented yet.");
  reference=dotnet;
  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SpeechRecognition)throw new Error('This browser does not support speech recognition. Use Edge or Chrome.');
@@ -121,4 +124,4 @@ async function start(dotnet){
  active=true;recognition.start();
 }
 function stop(){active=false;recognition?.stop();recognition=null;}
-window.videoPrompter={start,stop,scrollTo:scrollToWord,exportSrt,clearCaptions,initializeFolders,selectFolder,clearSrtFolder,loadTextFile};
+window.videoPrompter={start,stop,getSpeechEngine,setSpeechEngine,scrollTo:scrollToWord,exportSrt,clearCaptions,initializeFolders,selectFolder,clearSrtFolder,loadTextFile};
